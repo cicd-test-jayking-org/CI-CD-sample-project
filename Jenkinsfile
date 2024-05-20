@@ -16,7 +16,7 @@ pipeline {
         }
         stage('Login to AWS ECR') {
             steps {
-            withCredentials([usernamePassword(credentialsId: 'aws-credentials', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+                            withCredentials([usernamePassword(credentialsId: 'jenkins-aws-cd-test', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
                 script {
                     sh '''
                     aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
