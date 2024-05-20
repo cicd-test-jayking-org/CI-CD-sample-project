@@ -2,7 +2,7 @@ pipeline {
     agent any
     environment {
         AWS_ACCOUNT_ID = '767397825403'
-        AWS_REGION = '767397825403'
+        AWS_REGION = 'ap-northeast-2'
         IMAGE_REPO_NAME = 'jenkins-cd-test'
         DOCKER_IMAGE = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
     }
