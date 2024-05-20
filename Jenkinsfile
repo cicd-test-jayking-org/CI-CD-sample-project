@@ -10,7 +10,6 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    // Docker 이미지 빌드
                     sh 'docker build -t jenkins-testing:latest .'
                 }
             }
@@ -18,7 +17,6 @@ pipeline {
         stage('Login to AWS ECR') {
             steps {
                 script {
-                    // AWS ECR 로그인
                     sh '''
                     aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
                     '''
@@ -28,7 +26,6 @@ pipeline {
         stage('Tag & Push to ECR') {
             steps {
                 script {
-                    // Docker 이미지 태그 및 ECR로 푸시
                     sh '''
                     docker tag jenkins-testing:latest $DOCKER_IMAGE:latest
                     docker push $DOCKER_IMAGE:latest
