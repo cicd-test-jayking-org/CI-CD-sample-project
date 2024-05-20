@@ -15,10 +15,17 @@ pipeline {
             }
         }
         stage('Login to AWS ECR') {
+//             steps {
+//                 script {
+//                     sh '''
+//                     aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/jenkins-cd-test
+//                     '''
+//                 }
+//             }
             steps {
                 script {
                     sh '''
-                    aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/jenkins-cd-test
+                    aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin 767397825403.dkr.ecr.ap-northeast-2.amazonaws.com/jenkins-cd-test
                     '''
                 }
             }
