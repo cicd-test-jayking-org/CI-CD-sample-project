@@ -1,13 +1,9 @@
-name: Push Image to Amazon ECR
+name: CI/CD Pipeline
 
 on:
   push:
     branches:
       - main
-
-concurrency:
-  group: ${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
   build:
@@ -28,7 +24,7 @@ jobs:
 
       - name: Login to AWS ECR
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
+        uses: aws-actions/amazon-ecr-login@v2
         with:
           region: ${{ secrets.AWS_REGION }}
 
