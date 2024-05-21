@@ -38,13 +38,11 @@ jobs:
         env:
           ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
           ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
-          IMAGE_TAG: ${{ github.event.release.name }}
-        with:
-          arguments: bootBuildImage --publishImage
+          IMAGE_TAG: ${{ github.event.release.tag_name }}
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
       - name: Logout from AWS ECR
         run: |
-          docker logout $ECR_REGISTRY
+          docker logout $ECR_REGISTRY4
