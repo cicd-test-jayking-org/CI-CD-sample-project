@@ -10,8 +10,8 @@ on:
 env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
   ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
-  ECS_SERVICE: ${{ secrets.AWS_REGION }}
-  ECS_CLUSTER: ${{ secrets.AWS_REGION }}
+  ECS_SERVICE: ${{ secrets.ECS_SERVICE }}
+  ECS_CLUSTER: ${{ secrets.ECS_CLUSTER }}
   ECS_TASK_DEFINITION: ${{ secrets.ECS_TASK_DEFINITION }}
   # file, e.g. .aws/task-definition.json
   CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}
