@@ -1,10 +1,8 @@
 name: Push an Release Image to Production ECS
 
-
 on:
   release:
-    types:
-      - published
+    types: [ "published" ]
 
 env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
