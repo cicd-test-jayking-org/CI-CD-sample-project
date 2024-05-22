@@ -12,6 +12,6 @@ class HelloController {
 
     @GetMapping
     suspend fun printHello(): Flow<String> {
-        return flowOf("Hello World!!!")
+        return flowOf("Hello World")
     }
 }
