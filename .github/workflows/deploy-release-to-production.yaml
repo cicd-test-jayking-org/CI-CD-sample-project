@@ -1,17 +1,15 @@
 name: Push an Release Image to Production ECS
 
-
 on:
   release:
-    types:
-      - published
+    types: [ "published" ]
 
 env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
   ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
   ECS_SERVICE: ${{ secrets.ECS_SERVICE }}
   ECS_CLUSTER: ${{ secrets.ECS_CLUSTER }}
-  ECS_TASK_DEFINITION: .aws/task-definition.json
+  ECS_TASK_DEFINITION: .aws/task-definition-dev.json
   CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}
 
 permissions:
