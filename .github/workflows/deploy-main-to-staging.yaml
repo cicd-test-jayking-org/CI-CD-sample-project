@@ -1,25 +1,22 @@
-name: Deploy an Dev Image to Development ECS
+name: Deploy Stage Image to Staging ECS
 
 on:
   push:
-    branches: [ "dev" ]
+    branches: [ "main" ]
 
 env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
   ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
-  ECS_SERVICE: ${{ secrets.ECS_SERVICE }}-dev
+  ECS_SERVICE: ${{ secrets.ECS_SERVICE }}
   ECS_CLUSTER: ${{ secrets.ECS_CLUSTER }}
-  ECS_TASK_DEFINITION: .aws/task-definition-dev.json
+  ECS_TASK_DEFINITION: .aws/task-definition-staging.json
   CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}
-
-permissions:
-  contents: read
 
 jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
-    environment: development
+    environment: stage
 
     steps:
       - name: Checkout code
@@ -32,13 +29,13 @@ jobs:
           distribution: 'corretto'
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          aws-region: ${{ env.AWS_REGION }}
 
-      - name: Login to AWS ECR
+      - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
@@ -46,7 +43,7 @@ jobs:
         id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_TAG: dev
+          IMAGE_TAG: stage
         run: |
           # Build a docker container and
           # push it to ECR so that it can

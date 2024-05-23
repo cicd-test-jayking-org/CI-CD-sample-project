@@ -1,20 +1,55 @@
-name: Deploy Stage Image to Staging ECS
+name: Build & Deploy an Develop Image to Develop server
 
 on:
   push:
-    branches: [ "staging" ]
+    branches: [ "develop" ]
 
 env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
   ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
-  ECS_SERVICE: ${{ secrets.ECS_SERVICE }}
+  ECS_SERVICE: ${{ secrets.ECS_SERVICE }}-dev
   ECS_CLUSTER: ${{ secrets.ECS_CLUSTER }}
-  ECS_TASK_DEFINITION: .aws/task-definition-staging.json
+  ECS_TASK_DEFINITION: .aws/task-definition-develop.json
   CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}
+
+permissions:
+  contents: read
 
 jobs:
   build:
+    name: Build
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5 # v3.1.0
+
+      - name: Build with Gradle Wrapper
+        run: ./gradlew build
+
+  dependency-submission:
+    name: dependencies
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'corretto'
+
+      - name: Generate and submit dependency graph
+        uses: gradle/actions/dependency-submission@417ae3ccd767c252f5661f1ace9f835f9654f2b5 #
+
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    environment: development
 
     steps:
       - name: Checkout code
@@ -26,20 +61,15 @@ jobs:
           java-version: '17'
           distribution: 'corretto'
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5 # v3.1.0
-
-      - name: Build with Gradle Wrapper
-        run: ./gradlew build
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Login to Amazon ECR
+      - name: Login to AWS ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
@@ -47,7 +77,7 @@ jobs:
         id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_TAG: stage
+          IMAGE_TAG: develop
         run: |
           # Build a docker container and
           # push it to ECR so that it can

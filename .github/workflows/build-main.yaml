@@ -1,14 +1,16 @@
 name: CI with Gradle in Pull Request to Dev
 
 on:
-  #  push:
-  #    branches: [ "main" ]
   pull_request:
-    branches: [ "dev" ]
+    branches: [ "main" ]
+  push:
+    branches: [ "main" ]
+  release:
+    types: [ "published" ]
 
 jobs:
   build:
-
+    name: Build
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -28,7 +30,7 @@ jobs:
         run: ./gradlew build
 
   dependency-submission:
-
+    name: dependencies
     runs-on: ubuntu-latest
     permissions:
       contents: write
