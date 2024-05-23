@@ -7,7 +7,7 @@ on:
 env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
   ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
-  ECS_SERVICE: ${{ secrets.ECS_SERVICE }}-dev
+  ECS_SERVICE: ${{ secrets.ECS_SERVICE }}-develop
   ECS_CLUSTER: ${{ secrets.ECS_CLUSTER }}
   ECS_TASK_DEFINITION: .aws/task-definition-develop.json
   CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}
