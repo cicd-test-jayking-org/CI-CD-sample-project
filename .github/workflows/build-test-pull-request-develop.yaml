@@ -32,7 +32,7 @@ jobs:
           author_name: Build & Test before Pull Request
           job_name: Build & Test on develop
           mention: 'channel'
-          if_mention: failure, cancelled
+          if_mention: 'failure, cancelled'
           fields: repo,commit,message,author,job,eventName,ref,workflow,took,pullRequest
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_NOTI_PR_DEVELOP }}

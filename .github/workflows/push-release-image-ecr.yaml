@@ -84,7 +84,7 @@ jobs:
           author_name: Push & Deploy to production
           job_name: Deploy to production
           mention: 'channel'
-          if_mention: failure, cancelled
+          if_mention: 'failure, cancelled'
           fields: repo,commit,message,author,job,eventName,ref,workflow,took
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_NOTI_DEPLOY_PRODUCTION }}
