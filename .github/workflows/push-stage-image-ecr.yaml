@@ -81,7 +81,7 @@ jobs:
         uses: 8398a7/action-slack@v3
         with:
           status: ${{ job.status }}
-          author_name: Push & Deploy to develop
+          author_name: Push & Deploy to staging
           job_name: Deploy to staging
           mention: 'channel'
           if_mention: failure, cancelled
