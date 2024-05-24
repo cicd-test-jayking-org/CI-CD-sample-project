@@ -12,7 +12,6 @@ class HelloController {
 
     @GetMapping
     suspend fun printHello(): Flow<String> {
-        println("modified line")
         return flowOf("Hello World")
     }
 }
