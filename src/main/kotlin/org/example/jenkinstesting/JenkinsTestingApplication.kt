@@ -1,5 +1,6 @@
 package org.example.jenkinstesting
 
+import mu.KotlinLogging
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
@@ -7,7 +8,7 @@ import org.springframework.boot.runApplication
 class JenkinsTestingApplication
 
 fun main(args: Array<String>) {
-    println("test line1")
-    println("test line2")
+    val log = KotlinLogging.logger { }
     runApplication<JenkinsTestingApplication>(*args)
+    log.info { "========= CHECk CHECK ========" }
 }
