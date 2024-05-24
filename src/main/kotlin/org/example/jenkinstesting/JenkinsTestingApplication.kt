@@ -7,5 +7,7 @@ import org.springframework.boot.runApplication
 class JenkinsTestingApplication
 
 fun main(args: Array<String>) {
+    println("test line1")
+    println("test line2")
     runApplication<JenkinsTestingApplication>(*args)
 }
