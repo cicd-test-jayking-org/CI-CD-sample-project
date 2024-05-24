@@ -1,4 +1,4 @@
-name: Push & Deploy develop image to AWS ECR
+name: Push & Deploy develop image to AWS ECR/ECS
 
 on:
   push:
@@ -17,7 +17,7 @@ permissions:
 
 jobs:
   deploy:
-    name: Deploy on develop
+    name: Deploy to develop
     runs-on: ubuntu-latest
     environment: develop
 
@@ -77,12 +77,15 @@ jobs:
           cluster: ${{ env.ECS_CLUSTER }}
           wait-for-service-stability: true
 
-      - name: notify-slackbot
+      - name: Notify-Slack
         uses: 8398a7/action-slack@v3
         with:
           status: ${{ job.status }}
-          author_name: Github action
-          fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
+          author_name: Push & Deploy to develop
+          job_name: Deploy to develop
+          mention: 'channel'
+          if_mention: failure, cancelled
+          fields: repo,commit,message,author,job,eventName,ref,workflow,took,pullRequest
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_NOTI_DEPLOY_DEVELOP }} # required
-        if: always() # Pick up events even if the job fails or is canceled.
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_NOTI_DEPLOY_DEVELOP }}
+          if: always()
