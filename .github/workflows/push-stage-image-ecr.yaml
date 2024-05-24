@@ -17,7 +17,7 @@ permissions:
 
 jobs:
   deploy:
-    name: Deploy
+    name: Deploy on staging
     runs-on: ubuntu-latest
     environment: stage
 

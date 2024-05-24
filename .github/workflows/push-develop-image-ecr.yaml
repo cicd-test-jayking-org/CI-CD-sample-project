@@ -17,7 +17,7 @@ permissions:
 
 jobs:
   deploy:
-    name: Deploy
+    name: Deploy on develop
     runs-on: ubuntu-latest
     environment: develop
 
@@ -76,3 +76,13 @@ jobs:
           service: ${{ env.ECS_SERVICE }}
           cluster: ${{ env.ECS_CLUSTER }}
           wait-for-service-stability: true
+
+      - name: notify-slackbot
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          author_name: Github action
+          fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_NOTI_DEPLOY_DEVELOP }} # required
+        if: always() # Pick up events even if the job fails or is canceled.
