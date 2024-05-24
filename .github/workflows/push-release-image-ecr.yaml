@@ -1,4 +1,4 @@
-name: Push & Deploy release(main) image to AWS ECR/ECS
+name: Push & Deploy release(main) image to AWS ECR
 
 on:
   release:
@@ -85,7 +85,7 @@ jobs:
           job_name: Deploy to production
           mention: 'channel'
           if_mention: failure, cancelled
-          fields: repo,commit,message,author,job,eventName,ref,workflow,took,pullRequest
+          fields: repo,commit,message,author,job,eventName,ref,workflow,took
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_NOTI_DEPLOY_PRODUCTION }}
           if: always()

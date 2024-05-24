@@ -1,4 +1,4 @@
-name: Push & Deploy stage image to AWS ECR/ECS
+name: Push & Deploy stage image to AWS ECR
 
 on:
   push:
@@ -85,7 +85,7 @@ jobs:
           job_name: Deploy to staging
           mention: 'channel'
           if_mention: failure, cancelled
-          fields: repo,commit,message,author,job,eventName,ref,workflow,took,pullRequest
+          fields: repo,commit,message,author,job,eventName,ref,workflow,took
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_NOTI_DEPLOY_STAGING }}
           if: always()
