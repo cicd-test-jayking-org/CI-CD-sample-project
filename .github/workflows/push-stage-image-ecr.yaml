@@ -1,4 +1,4 @@
-name: Push & Deploy stage image to AWS ECR
+name: Push & Deploy stage image to AWS ECR/ECS
 
 on:
   push:
@@ -17,7 +17,7 @@ permissions:
 
 jobs:
   deploy:
-    name: Deploy on staging
+    name: Deploy to staging
     runs-on: ubuntu-latest
     environment: stage
 
@@ -76,3 +76,16 @@ jobs:
           service: ${{ env.ECS_SERVICE }}
           cluster: ${{ env.ECS_CLUSTER }}
           wait-for-service-stability: true
+
+      - name: Notify-Slack
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          author_name: Push & Deploy to develop
+          job_name: Deploy to staging
+          mention: 'channel'
+          if_mention: failure, cancelled
+          fields: repo,commit,message,author,job,eventName,ref,workflow,took,pullRequest
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_NOTI_DEPLOY_STAGING }}
+          if: always()
