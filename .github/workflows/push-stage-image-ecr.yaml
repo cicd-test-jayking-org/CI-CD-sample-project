@@ -1,15 +1,15 @@
-name: Build & Deploy an Develop Image to Develop server
+name: Push & Deploy stage image to AWS ECR
 
 on:
   push:
-    branches: [ "develop" ]
+    branches: [ "main" ]
 
 env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
   ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
-  ECS_SERVICE: ${{ secrets.ECS_SERVICE }}-develop
+  ECS_SERVICE: ${{ secrets.ECS_SERVICE }}-stage
   ECS_CLUSTER: ${{ secrets.ECS_CLUSTER }}
-  ECS_TASK_DEFINITION: .aws/task-definition-develop.json
+  ECS_TASK_DEFINITION: .aws/task-definition-stage.json
   CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}
 
 permissions:
@@ -17,7 +17,7 @@ permissions:
 
 jobs:
   build:
-    name: Build
+    name: Build & Test
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -31,13 +31,13 @@ jobs:
           distribution: 'corretto'
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5 # v3.1.0
+        uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5
 
       - name: Build with Gradle Wrapper
         run: ./gradlew build
 
   dependency-submission:
-    name: dependencies
+    name: Dependencies
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -84,7 +84,7 @@ jobs:
         id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_TAG: develop
+          IMAGE_TAG: stage
         run: |
           # Build a docker container and
           # push it to ECR so that it can

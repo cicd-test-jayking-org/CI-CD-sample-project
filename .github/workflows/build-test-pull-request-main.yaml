@@ -1,16 +1,12 @@
-name: CI with Gradle in Pull Request to Dev
+name: Build & Test in Pull Request to Stage
 
 on:
   pull_request:
     branches: [ "main" ]
-  push:
-    branches: [ "main" ]
-  release:
-    types: [ "published" ]
 
 jobs:
   build:
-    name: Build
+    name: Build & Test
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -30,7 +26,7 @@ jobs:
         run: ./gradlew build
 
   dependency-submission:
-    name: dependencies
+    name: Dependencies
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -44,5 +40,4 @@ jobs:
           distribution: 'corretto'
 
       - name: Generate and submit dependency graph
-        uses: gradle/actions/dependency-submission@417ae3ccd767c252f5661f1ace9f835f9654f2b5 # v3.1.0
-
+        uses: gradle/actions/dependency-submission@417ae3ccd767c252f5661f1ace9f835f9654f2b5 #
