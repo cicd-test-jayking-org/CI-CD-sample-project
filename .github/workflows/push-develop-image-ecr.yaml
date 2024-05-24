@@ -1,4 +1,4 @@
-name: Push & Deploy develop image to AWS ECR/ECS
+name: Push & Deploy develop image to AWS ECR
 
 on:
   push:
