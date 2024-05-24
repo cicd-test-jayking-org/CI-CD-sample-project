@@ -25,19 +25,15 @@ jobs:
       - name: Build with Gradle Wrapper
         run: ./gradlew build
 
-  dependency-submission:
-    name: Dependencies
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
+      - name: Notify-Slack
+        uses: 8398a7/action-slack@v3
         with:
-          java-version: '17'
-          distribution: 'corretto'
-
-      - name: Generate and submit dependency graph
-        uses: gradle/actions/dependency-submission@417ae3ccd767c252f5661f1ace9f835f9654f2b5 #
+          status: ${{ job.status }}
+          author_name: Build & Test before Pull Request
+          job_name: Build & Test on main
+          mention: 'channel'
+          if_mention: failure, cancelled
+          fields: repo,commit,message,author,job,eventName,ref,workflow,took,pullRequest
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_NOTI_DEPLOY_PRODUCTION }}
+          if: always()
