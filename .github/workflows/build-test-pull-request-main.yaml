@@ -41,7 +41,7 @@ jobs:
           job_name: Build & Test on main
           mention: 'channel'
           if_mention: 'failure, cancelled'
-          fields: repo,commit,message,author,job,eventName,ref,workflow,took
+          fields: repo,commit,message,author,job,eventName,ref,workflow,took,pullRequest
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_NOTI_PR_MAIN }}
         if: always()
