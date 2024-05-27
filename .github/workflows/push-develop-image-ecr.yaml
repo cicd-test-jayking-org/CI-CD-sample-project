@@ -77,10 +77,31 @@ jobs:
           cluster: ${{ env.ECS_CLUSTER }}
           wait-for-service-stability: true
 
-      - name: Notify-Slack
+  #      - name: Notify-Slack
+  #        uses: 8398a7/action-slack@v3
+  #        with:
+  #          status: ${{ job.status }}
+  #          author_name: Push & Deploy to develop
+  #          job_name: Deploy to develop
+  #          mention: 'channel'
+  #          if_mention: 'failure, cancelled'
+  #          fields: repo,commit,message,author,job,eventName,ref,workflow,took
+  #        env:
+  #          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_NOTI_DEPLOY_DEVELOP }}
+  #          if: always()
+
+  notification:
+    name: Notification
+    runs-on: ubuntu-latest
+    if: ${{ always() }}
+    needs: [ build, deploy ]
+    steps:
+      - uses: martialonline/workflow-status@v3
+        id: check
+      - name: action-slack
         uses: 8398a7/action-slack@v3
         with:
-          status: ${{ job.status }}
+          status: ${{ steps.check.outputs.status }}
           author_name: Push & Deploy to develop
           job_name: Deploy to develop
           mention: 'channel'
@@ -88,4 +109,5 @@ jobs:
           fields: repo,commit,message,author,job,eventName,ref,workflow,took
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_NOTI_DEPLOY_DEVELOP }}
-          if: always()
+        if: always()
+
