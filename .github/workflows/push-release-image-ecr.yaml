@@ -7,9 +7,9 @@ on:
 env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
   ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
-  ECS_SERVICE: ${{ secrets.ECS_SERVICE }}-production
   ECS_CLUSTER: ${{ secrets.ECS_CLUSTER }}
-  ECS_TASK_DEFINITION: .aws/task-definition-production.json
+  ECS_SERVICE: ${{ secrets.ECS_SERVICE }}-production
+  ECS_TASK_NAME: ${{ secrets.ECS_TASK_NAME }}
   CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}
 
 permissions:
@@ -44,6 +44,11 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
+      - name: Set short git commit SHA
+        id: commit-sha
+        run: |
+          echo "shortCommitSha=$(git rev-parse --short ${{ github.sha }})" >>$GITHUB_OUTPUT  
+
       - name: Login to AWS ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
@@ -52,20 +57,24 @@ jobs:
         id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_TAG: release
+          IMAGE_TAG: release-${{ steps.commit-sha.outputs.shortCommitSha }}
         run: |
-          # Build a docker container and
-          # push it to ECR so that it can
-          # be deployed to ECS.
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      - name: Retrieve most recent ECS task definition JSON file
+        id: retrieve-task-def
+        run: |
+          aws ecs describe-task-definition --task-definition $ECS_TASK_NAME --query taskDefinition > task-definition.json
+          cat task-definition.json
+          echo "task-def-file=task-definition.json" >> $GITHUB_OUTPUT
 
       - name: Fill in the new image ID in the Amazon ECS task definition
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
-          task-definition: ${{ env.ECS_TASK_DEFINITION }}
+          task-definition: ${{ steps.retrieve-task-def.outputs.task-def-file }}
           container-name: ${{ env.CONTAINER_NAME }}
           image: ${{ steps.build-image.outputs.image }}
 
@@ -77,15 +86,23 @@ jobs:
           cluster: ${{ env.ECS_CLUSTER }}
           wait-for-service-stability: true
 
-      - name: Notify-Slack
+  notification:
+    name: Slack Notification
+    runs-on: ubuntu-latest
+    if: ${{ always() }}
+    needs: [ deploy ]
+    steps:
+      - uses: martialonline/workflow-status@v3
+        id: check
+      - name: action-slack
         uses: 8398a7/action-slack@v3
         with:
-          status: ${{ job.status }}
+          status: ${{ steps.check.outputs.status }}
           author_name: Push & Deploy to production
           job_name: Deploy to production
           mention: 'channel'
-          if_mention: failure, cancelled
+          if_mention: 'failure, cancelled'
           fields: repo,commit,message,author,job,eventName,ref,workflow,took
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_NOTI_DEPLOY_PRODUCTION }}
-          if: always()
+        if: always()
