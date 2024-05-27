@@ -9,7 +9,6 @@ env:
   ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
   ECS_SERVICE: ${{ secrets.ECS_SERVICE }}-develop
   ECS_CLUSTER: ${{ secrets.ECS_CLUSTER }}
-  ECS_TASK_DEFINITION: .aws/task-definition-develop.json
   CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}
 
 permissions:
@@ -45,10 +44,10 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Set short git commit SHA
-        id: vars
+        id: commit-sha
         run: |
-          calculatedSha=$(git rev-parse --short ${{ github.sha }})
-          echo "::set-output name=short_sha::$calculatedSha"  
+          shortCommitSha=$(git rev-parse --short ${{ github.sha }})
+          echo "::set-output name=short_sha::shortCommitSha"  
 
       - name: Login to AWS ECR
         id: login-ecr
@@ -58,7 +57,7 @@ jobs:
         id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_TAG: develop:${{ steps.vars.outputs.short_sha }}
+          IMAGE_TAG: develop-${{ steps.commit-sha.outputs.short_sha }}
         run: |
           # Build a docker container and
           # push it to ECR so that it can
