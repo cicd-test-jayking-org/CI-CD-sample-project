@@ -37,8 +37,8 @@ jobs:
         uses: 8398a7/action-slack@v3
         with:
           status: ${{ steps.check.outputs.status }}
-          author_name: Push & Deploy to develop
-          job_name: Deploy to develop
+          author_name: Build & Test before Pull Request
+          job_name: Build & Test on main
           mention: 'channel'
           if_mention: 'failure, cancelled'
           fields: repo,commit,message,author,job,eventName,ref,workflow,took
