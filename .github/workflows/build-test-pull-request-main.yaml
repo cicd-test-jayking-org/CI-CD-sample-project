@@ -25,15 +25,23 @@ jobs:
       - name: Build with Gradle Wrapper
         run: ./gradlew build
 
-      - name: Notify-Slack
+  notification:
+    name: Slack Notification
+    runs-on: ubuntu-latest
+    if: ${{ always() }}
+    needs: [ build ]
+    steps:
+      - uses: martialonline/workflow-status@v3
+        id: check
+      - name: action-slack
         uses: 8398a7/action-slack@v3
         with:
-          status: ${{ job.status }}
-          author_name: Build & Test before Pull Request
-          job_name: Build & Test on main
+          status: ${{ steps.check.outputs.status }}
+          author_name: Push & Deploy to develop
+          job_name: Deploy to develop
           mention: 'channel'
           if_mention: 'failure, cancelled'
-          fields: repo,commit,message,author,job,eventName,ref,workflow,took,pullRequest
+          fields: repo,commit,message,author,job,eventName,ref,workflow,took
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_NOTI_PR_MAIN }}
-          if: always()
+        if: always()

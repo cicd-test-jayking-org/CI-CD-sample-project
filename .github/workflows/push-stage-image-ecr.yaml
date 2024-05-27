@@ -89,3 +89,24 @@ jobs:
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_NOTI_DEPLOY_STAGING }}
           if: always()
+
+  notification:
+    name: Slack Notification
+    runs-on: ubuntu-latest
+    if: ${{ always() }}
+    needs: [ deploy ]
+    steps:
+      - uses: martialonline/workflow-status@v3
+        id: check
+      - name: action-slack
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ steps.check.outputs.status }}
+          author_name: Push & Deploy to develop
+          job_name: Deploy to develop
+          mention: 'channel'
+          if_mention: 'failure, cancelled'
+          fields: repo,commit,message,author,job,eventName,ref,workflow,took
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_NOTI_DEPLOY_STAGING }}
+        if: always()
