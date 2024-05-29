@@ -9,8 +9,8 @@ env:
   ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
   ECS_CLUSTER: ${{ secrets.ECS_CLUSTER }}
   ECS_SERVICE: ${{ secrets.ECS_SERVICE }}-production
-  ECS_TASK_NAME: ${{ secrets.ECS_TASK_NAME }}
-  CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}
+  ECS_TASK_NAME: ${{ secrets.ECS_TASK_NAME }}-production
+  CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}-production-container
 
 permissions:
   contents: read
