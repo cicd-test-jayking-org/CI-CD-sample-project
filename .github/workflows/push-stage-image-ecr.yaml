@@ -8,16 +8,16 @@ env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
   ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
   ECS_CLUSTER: ${{ secrets.ECS_CLUSTER }}
-  ECS_SERVICE: ${{ secrets.ECS_SERVICE }}-staging
-  ECS_TASK_NAME: ${{ secrets.ECS_TASK_NAME }}
-  CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}
+  ECS_SERVICE: ${{ secrets.ECS_SERVICE }}-stage
+  ECS_TASK_NAME: ${{ secrets.ECS_TASK_NAME }}-stage
+  # CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}
 
 permissions:
   contents: read
 
 jobs:
   deploy:
-    name: Deploy to staging
+    name: Deploy to stage
     runs-on: ubuntu-latest
     environment: stage
 
@@ -75,7 +75,7 @@ jobs:
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: ${{ steps.retrieve-task-def.outputs.task-def-file }}
-          container-name: ${{ env.CONTAINER_NAME }}
+          container-name: ${{ env.CONTAINER_NAME }}-stage-container
           image: ${{ steps.build-image.outputs.image }}
 
       - name: Deploy Amazon ECS task definition
@@ -98,8 +98,8 @@ jobs:
         uses: 8398a7/action-slack@v3
         with:
           status: ${{ steps.check.outputs.status }}
-          author_name: Push & Deploy to staging
-          job_name: Deploy to staging
+          author_name: Push & Deploy to stage
+          job_name: Deploy to stage
           mention: 'channel'
           if_mention: 'failure, cancelled'
           fields: repo,commit,message,author,job,eventName,ref,workflow,took
