@@ -12,7 +12,7 @@ class HelloController {
 
     @GetMapping
     suspend fun printHello(): Flow<String> {
-        println(2)
+        println(1)
         return flowOf("Hello World")
     }
 }
