@@ -31,7 +31,7 @@ jobs:
         run: |
           PR_NUMBER=${{ github.event.pull_request.number }}
           PR_BODY=${{ github.event.pull_request.body }}
-          NEW_BODY=$(echo "$PR_BODY" | sed "s/JIRA_TICKET_NUMBER/$[JIRA_TICKET_NUMBER](https://colosseum.atlassian.net/browse/JIRA_TICKET_NUMBER)/")
+          NEW_BODY=$(echo "$PR_BODY" | sed "s/JIRA_TICKET_NUMBER/[${JIRA_TICKET_NUMBER}](https://colosseum.atlassian.net/browse/${JIRA_TICKET_NUMBER})/")
           gh pr edit $PR_NUMBER --body "$NEW_BODY"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
