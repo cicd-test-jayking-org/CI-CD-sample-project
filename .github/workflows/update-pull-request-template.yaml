@@ -21,7 +21,7 @@ jobs:
           echo "BRANCH_NAME=${{ github.event.pull_request.head.ref }}" >> $GITHUB_ENV
           
           # Assuming the branch name follows the pattern 'feature/issue-123-description'
-          JIRA_TICKET_NUMBER=$(echo ${{ github.event.pull_request.head.ref }} | grep -oP '($JIRA_PROJECT_KEY-[0-9]+)')
+          JIRA_TICKET_NUMBER=$(echo ${{ github.event.pull_request.head.ref }} | grep -oP '(${{ env.JIRA_PROJECT_KEY }}-[0-9]+)')
           if [ -z "$JIRA_TICKET_NUMBER" ]; then
             JIRA_TICKET_NUMBER="No issue part found"
           fi
