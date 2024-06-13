@@ -1,0 +1,37 @@
+name: Update PR Template with Branch Name
+
+on:
+  pull_request:
+    types: [ opened, edited ]
+
+env:
+  jira_project_key: NC
+
+jobs:
+  update_pr:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v2
+
+      - name: Extract branch name part
+        id: extract
+        run: |
+          echo "BRANCH_NAME=${{ github.event.pull_request.head.ref }}" >> $GITHUB_ENV
+
+          # Assuming the branch name follows the pattern 'feature/issue-123-description'
+          JIRA_TICKET_NUMBER=$(echo ${{ github.event.pull_request.head.ref }} | grep -oP '(${{ env.jira_project_key }}-[0-9]+)')
+          if [ -z "$JIRA_TICKET_NUMBER" ]; then
+            JIRA_TICKET_NUMBER="Not found Jira ticket number"
+          fi
+          echo "JIRA_TICKET_NUMBER=${JIRA_TICKET_NUMBER}" >> $GITHUB_ENV
+
+      - name: Update PR description
+        run: |
+          PR_NUMBER=${{ github.event.pull_request.number }}
+          PR_BODY=${{ github.event.pull_request.body }}
+          NEW_BODY=$(echo "$PR_BODY" | sed "s/JIRA_TICKET_NUMBER/$[JIRA_TICKET_NUMBER](https://colosseum.atlassian.net/browse/JIRA_TICKET_NUMBER)/")
+          gh pr edit $PR_NUMBER --body "$NEW_BODY"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
