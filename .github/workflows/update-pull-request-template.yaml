@@ -2,7 +2,7 @@ name: Update PR Template with Branch Name
 
 on:
   pull_request:
-    types: [ opened, edited ]
+    types: [ "opened", "edited" ]
 
 env:
   jira_project_key: NC
