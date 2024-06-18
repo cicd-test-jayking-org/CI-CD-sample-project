@@ -1,25 +1,29 @@
-name: Push & Deploy release(main) image to AWS ECR
+name: Push & Deploy stage image to AWS ECS
 
 on:
-  release:
-    types: [ "published" ]
+  push:
+    branches: [ "main" ]
 
 env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
-  ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
-  ECS_CLUSTER: ${{ secrets.ECS_CLUSTER }}
-  ECS_SERVICE: ${{ secrets.ECS_SERVICE }}-production
-  ECS_TASK_NAME: ${{ secrets.ECS_TASK_NAME }}-production
-  CONTAINER_NAME: ${{ secrets.CONTAINER_NAME }}-production-container
+  AWS_ECR_REPOSITORY_URL: ${{ secrets.AWS_ECR_REPOSITORY_URL }}
+  AWS_ECS_CLUSTER_NAME: ${{ secrets.AWS_ECS_CLUSTER_NAME }}
+  # modify the suffix(-environment) according to deploy environment name
+  AWS_ECS_SERVICE_NAME: ${{ secrets.AWS_ECS_SERVICE_NAME }}-stage
+  # modify the suffix(-environment) according to deploy environment name
+  AWS_ECS_TASK_NAME: ${{ secrets.AWS_ECS_TASK_NAME }}-stage
+  # modify the suffix(-environment) according to deploy environment name
+  AWS_ECS_CONTAINER_NAME: ${{ secrets.AWS_ECS_CONTAINER_NAME }}-stage
 
 permissions:
   contents: read
 
 jobs:
   deploy:
-    name: Deploy to production
+    # modify the environment
+    name: Deploy to stage
     runs-on: ubuntu-latest
-    environment: production
+    environment: stage
 
     steps:
       - name: Checkout code
@@ -57,16 +61,17 @@ jobs:
         id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_TAG: release-${{ steps.commit-sha.outputs.shortCommitSha }}
+          # modify the prefix(environment-) according to deploy environment name
+          IMAGE_TAG: stage-${{ steps.commit-sha.outputs.shortCommitSha }}
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+          docker build -t $ECR_REGISTRY/$AWS_ECR_REPOSITORY_URL:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$AWS_ECR_REPOSITORY_URL:$IMAGE_TAG
+          echo "image=$ECR_REGISTRY/$AWS_ECR_REPOSITORY_URL:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
       - name: Retrieve most recent ECS task definition JSON file
         id: retrieve-task-def
         run: |
-          aws ecs describe-task-definition --task-definition $ECS_TASK_NAME --query taskDefinition > task-definition.json
+          aws ecs describe-task-definition --task-definition $AWS_ECS_TASK_NAME --query taskDefinition > task-definition.json
           cat task-definition.json
           echo "task-def-file=task-definition.json" >> $GITHUB_OUTPUT
 
@@ -75,15 +80,15 @@ jobs:
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: ${{ steps.retrieve-task-def.outputs.task-def-file }}
-          container-name: ${{ env.CONTAINER_NAME }}
+          container-name: ${{ env.AWS_ECS_CONTAINER_NAME }}
           image: ${{ steps.build-image.outputs.image }}
 
       - name: Deploy Amazon ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
-          service: ${{ env.ECS_SERVICE }}
-          cluster: ${{ env.ECS_CLUSTER }}
+          service: ${{ env.AWS_ECS_SERVICE_NAME }}
+          cluster: ${{ env.AWS_ECS_CLUSTER_NAME }}
           wait-for-service-stability: true
 
   notification:
@@ -98,11 +103,12 @@ jobs:
         uses: 8398a7/action-slack@v3
         with:
           status: ${{ steps.check.outputs.status }}
-          author_name: Push & Deploy to production
-          job_name: Deploy to production
+          author_name: Push & Deploy to stage
+          job_name: Deploy to stage
           mention: 'channel'
           if_mention: 'failure, cancelled'
           fields: repo,commit,message,author,job,eventName,ref,workflow,took
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_NOTI_DEPLOY_PRODUCTION }}
+          # modify environment according to deploy environment name
+          SLACK_WEBHOOK_URL: ${{ secrets.NOTI_DEPLOY_STAGE_WEBHOOK }}
         if: always()
