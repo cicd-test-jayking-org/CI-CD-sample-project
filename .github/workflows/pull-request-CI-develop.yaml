@@ -4,19 +4,26 @@ on:
   pull_request:
     branches: [ "develop" ]
 
+env:
+  NOTI_PR_DEVELOP_WEBHOOK: ${{ secrets.NOTI_PR_DEVELOP_WEBHOOK }}
+
+permissions:
+  contents: read
+
+
 jobs:
   build:
     name: Build & Test on develop
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
 
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up JDK 17
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
+          java-version: '21'
           distribution: 'corretto'
 
       - name: Setup Gradle
@@ -43,5 +50,5 @@ jobs:
           if_mention: 'failure, cancelled'
           fields: repo,commit,message,author,job,eventName,ref,workflow,took,pullRequest
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.NOTI_DEPLOY_DEVELOP_WEBHOOK}}
+          SLACK_WEBHOOK_URL: ${{ env.NOTI_PR_DEVELOP_WEBHOOK}}
         if: always()
