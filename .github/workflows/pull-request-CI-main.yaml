@@ -2,21 +2,27 @@ name: Build & Test in Pull Request to Stage
 
 on:
   pull_request:
-    branches: [ "main" ]
+    branches: [ "staging" ]
+
+env:
+  NOTI_PR_STAGING_WEBHOOK: ${{ secrets.NOTI_PR_STAGING_WEBHOOK }}
+
+permissions:
+  contents: read
 
 jobs:
   build:
     name: Build & Test on main
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
 
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up JDK 17
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
+          java-version: '21'
           distribution: 'corretto'
 
       - name: Setup Gradle
@@ -43,5 +49,5 @@ jobs:
           if_mention: 'failure, cancelled'
           fields: repo,commit,message,author,job,eventName,ref,workflow,took,pullRequest
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.NOTI_PR_MAIN_WEBHOOK }}
+          SLACK_WEBHOOK_URL: ${{ env.NOTI_PR_STAGING_WEBHOOK }}
         if: always()
