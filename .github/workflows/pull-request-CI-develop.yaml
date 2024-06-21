@@ -4,19 +4,22 @@ on:
   pull_request:
     branches: [ "develop" ]
 
-
 env:
   NOTI_PR_DEVELOP_WEBHOOK: ${{ secrets.NOTI_PR_DEVELOP_WEBHOOK }}
+
+permissions:
+  contents: read
+
 
 jobs:
   build:
     name: Build & Test on develop
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
