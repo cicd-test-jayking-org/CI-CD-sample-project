@@ -22,9 +22,10 @@ permissions:
 
 jobs:
   deploy:
-    name: ${{ env.DEPLOY_ENVIRONMENT }}
+    # modify the suffix(-environment) according to deploy environment name
+    name: alpha
     runs-on: ubuntu-latest
-    environment: ${{ env.DEPLOY_ENVIRONMENT }}
+    environment: alpha
 
     steps:
       - name: Checkout code
