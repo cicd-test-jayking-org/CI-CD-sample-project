@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     id("org.springframework.boot") version "3.2.5"
     id("io.spring.dependency-management") version "1.1.4"
+    id("com.google.cloud.tools.jib") version "3.1.4"
     kotlin("jvm") version "1.9.23"
     kotlin("plugin.spring") version "1.9.23"
 }
@@ -52,3 +53,32 @@ tasks.withType<KotlinCompile> {
 tasks.withType<Test> {
     useJUnitPlatform()
 }
+
+jib {
+    val env = System.getenv("DEPLOY_ENVIRONMENT")
+    from {
+        image = "amazoncorretto:21"
+    }
+    to {
+        image =
+            "${System.getenv("AWS_ECR_REGISTRY")}/${System.getenv("AWS_ECR_REPOSITORY_NAME")}:${System.getenv("IMAGE_TAG")}"
+    }
+    container {
+        jvmFlags = when (env) {
+            "alpha" -> mutableListOf(
+                "-Xms512m",
+                "-Xmx1024m",
+                "-Dspring.profiles.active=$env",
+                "-Duser.timezone=UTC",
+                "-XX:+UseContainerSupport",
+            )
+
+            else -> emptyList()
+        }
+        creationTime = "USE_CURRENT_TIMESTAMP"
+        ports = mutableListOf("8080")
+        mainClass = "org.example.Main"
+
+    }
+}
+
