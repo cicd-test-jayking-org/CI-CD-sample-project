@@ -18,6 +18,7 @@ env:
   DEPLOY_ENVIRONMENT: alpha
 
 permissions:
+  id-token: write
   contents: read
 
 jobs:
