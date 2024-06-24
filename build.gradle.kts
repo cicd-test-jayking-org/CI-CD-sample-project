@@ -86,7 +86,6 @@ jib {
         creationTime = "USE_CURRENT_TIMESTAMP"
         ports = mutableListOf("8080")
         mainClass = "org.example.Main"
-
     }
 }
 
