@@ -1,8 +1,8 @@
 name: Push & Deploy develop image to AWS ECS
 
-on:
-  push:
-    branches: [ "develop" ]
+#on:
+#  push:
+#    branches: [ "develop" ]
 
 env:
   AWS_ARN: ${{ secrets.AWS_ARN }}
