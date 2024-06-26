@@ -5,8 +5,7 @@ on:
     branches: [ "develop" ]
 
 env:
-  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_ARN: ${{ secrets.AWS_ARN }}
   AWS_REGION: ${{ secrets.AWS_REGION }}
   AWS_ECR_REPOSITORY_NAME: ${{ secrets.AWS_ECR_REPOSITORY_NAME }}
   AWS_ECS_CLUSTER_NAME: ${{ secrets.AWS_ECS_CLUSTER_NAME }}
@@ -19,6 +18,7 @@ env:
   DEPLOY_ENVIRONMENT: alpha
 
 permissions:
+  id-token: write
   contents: read
 
 jobs:
@@ -45,11 +45,13 @@ jobs:
         run: ./gradlew build
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v3
         with:
-          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ env.AWS_ARN }}
+      #          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+      #          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+      #          aws-region: ${{ env.AWS_REGION }}
 
       - name: Set short git commit SHA
         id: commit-sha
