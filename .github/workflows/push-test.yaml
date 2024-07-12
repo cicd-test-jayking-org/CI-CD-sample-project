@@ -1,0 +1,69 @@
+name: Push & Deploy develop image to AWS ECS
+
+on:
+  push:
+    branches: [ "develop" ]
+
+env:
+  AWS_ARN: ${{ secrets.AWS_ARN }}
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  AWS_ECR_REPOSITORY_NAME: ${{ secrets.AWS_ECR_REPOSITORY_NAME }}
+  AWS_ECS_CLUSTER_NAME: ${{ secrets.AWS_ECS_CLUSTER_NAME }}
+  # modify the suffix(-environment) according to deploy environment name
+  AWS_ECS_TASK_DEFINITION_NAME: ${{ secrets.AWS_ECS_TASK_DEFINITION_NAME }}-alpha
+  AWS_ECS_SERVICE_NAME: ${{ secrets.AWS_ECS_SERVICE_NAME }}-alpha
+  AWS_ECS_CONTAINER_NAME: ${{ secrets.AWS_ECS_CONTAINER_NAME }}-alpha
+  ######################################################################
+  NOTI_DEPLOY_ALPHA_WEBHOOK: ${{ secrets.NOTI_DEPLOY_ALPHA_WEBHOOK }}
+  DEPLOY_ENVIRONMENT: alpha
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    # modify the environment
+    name: Deploy to alpha
+    runs-on: ubuntu-latest
+    environment: alpha
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'corretto'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5
+
+      - name: Build with Gradle Wrapper
+        run: ./gradlew build
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ env.AWS_ARN }}
+
+      - name: Set short git commit SHA
+        id: commit-sha
+        run: |
+          echo "shortCommitSha=$(git rev-parse --short ${{ github.sha }})" >>$GITHUB_OUTPUT  
+
+      - name: Login to AWS ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build, tag, and push image to Amazon ECR with JIB
+        id: build-image
+        env:
+          AWS_ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ env.DEPLOY_ENVIRONMENT }}-${{ steps.commit-sha.outputs.shortCommitSha }}
+        run: |
+          ./gradlew clean jib
+          echo "image=$AWS_ECR_REGISTRY/$AWS_ECR_REPOSITORY_NAME:$IMAGE_TAG" >> $GITHUB_OUTPUT
